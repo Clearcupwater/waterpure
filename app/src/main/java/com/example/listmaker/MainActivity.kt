@@ -2,11 +2,9 @@ package com.example.listmaker
 
 import android.os.Bundle
 import android.text.InputType
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Adapter
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-    lateinit var listRecyclerView: RecyclerView
+    lateinit var listsRecyclerView: RecyclerView
+    val listDataManager: ListDataManager = ListDataManager(this)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,10 +25,10 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             showCreateListDialog()
         }
-
-        listRecyclerView = findViewById(R.id.lists_recyclerview)
-        listRecyclerView.layoutManager = LinearLayoutManager(this)
-        listRecyclerView.adapter = ListSelectionRecyclerViewAdapter()
+        val lists = listDataManager.readList()
+        listsRecyclerView = findViewById(R.id.lists_recyclerview)
+        listsRecyclerView.layoutManager = LinearLayoutManager(this)
+        listsRecyclerView.adapter = ListSelectionRecyclerViewAdapter(lists)
 
     }
 
@@ -60,6 +59,11 @@ class MainActivity : AppCompatActivity() {
         builder.setView(listTitleEditText)
 
         builder.setPositiveButton(positiveButtonTitle){dialog, _ ->
+            val list = TaskList(listTitleEditText.text.toString())
+            listDataManager.saveList(list)
+
+            val recyclerAdapter = listsRecyclerView.adapter as ListSelectionRecyclerViewAdapter
+            recyclerAdapter.addList(list)
             dialog.dismiss()
         }
 
